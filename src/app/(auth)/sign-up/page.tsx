@@ -17,7 +17,7 @@ export default function SignUpPage() {
     name: data.name as string, // required, The name of the user.
     email: data.email, // required, The email address of the user.
     password: data.password, // required, The password of the user. It should be at least 8 characters long and max 128 by default.
-    role: data.role as string, // "seeker" | "recruiter" | "admin"
+    role: data.role, // "seeker" | "recruiter" | "admin"
 
     callbackURL: "/", // An optional URL to redirect to after the user signs up.
 });
