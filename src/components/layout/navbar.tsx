@@ -19,11 +19,6 @@ import { signOut, useSession } from "@/lib/auth-client";
 
 
 
-const navLinks = [
-  { href: "/jobs", label: "Browse Jobs" },
-  { href: "/companies", label: "Company" },
-  { href: "/pricing", label: "Pricing" },
-];
 
 
 
@@ -42,10 +37,25 @@ function Logo() {
 
 
 
+
+
+
 function NavLinks({ className }: { className?: string }) {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
-  
+  // Dashboard link only when logged in — points to the role's dashboard
+  const navLinks = [
+    { href: "/jobs", label: "Browse Jobs" },
+    { href: "/companies", label: "Company" },
+    { href: "/pricing", label: "Pricing" },
+
+    {
+      href: `/dashboard/${session?.user.role || "seeker"}`,
+      label: "Dashboard",
+    },
+
+  ] as const;
 
   return (
     <nav className={cn("flex items-center gap-2", className)}>
@@ -71,34 +81,33 @@ function NavLinks({ className }: { className?: string }) {
   );
 }
 
+
 function AuthButtons({ className }: { className?: string }) {
-  const {data:session}= useSession()
-  console.log("user data", session?.user);
+  const { data: session } = useSession()
 
-
-  const handleSignOUt =async ()=>{
+  const handleSignOUt = async () => {
     await signOut()
 
   }
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      {session?.user?
-      <>
-      <span className="text-[#EDEDEF]">welcome, {session.user.name}</span>
-      <Button onClick={handleSignOUt} nativeButton={false} className="h-10 bg-white px-5 text-lg font-medium text-[#645BFF] hover:bg-[#EDEDEF]">
-        Sign Out
-      </Button>
-      </>
-      :<>
-      <Button render={<Link href="/sign-in"></Link>} nativeButton={false} className="h-10 bg-white px-5 text-lg font-medium text-[#645BFF] hover:bg-[#EDEDEF]">
-        Sign In
-      </Button>
-      <Button render={<Link href="/sign-up"></Link>} nativeButton={false} className="h-10 bg-[#5C53FE] px-5 text-lg font-medium text-[#EDEDEF] hover:bg-[#4B43F0]">
-        Get Started
-      </Button>
-      </>}
-      
+      {session?.user ?
+        <>
+          <span className="text-[#EDEDEF]">welcome, {session.user.name}</span>
+          <Button onClick={handleSignOUt} nativeButton={false} className="h-10 bg-white px-5 text-lg font-medium text-[#645BFF] hover:bg-[#EDEDEF]">
+            Sign Out
+          </Button>
+        </>
+        : <>
+          <Button render={<Link href="/sign-in"></Link>} nativeButton={false} className="h-10 bg-white px-5 text-lg font-medium text-[#645BFF] hover:bg-[#EDEDEF]">
+            Sign In
+          </Button>
+          <Button render={<Link href="/sign-up"></Link>} nativeButton={false} className="h-10 bg-[#5C53FE] px-5 text-lg font-medium text-[#EDEDEF] hover:bg-[#4B43F0]">
+            Get Started
+          </Button>
+        </>}
+
     </div>
   );
 }

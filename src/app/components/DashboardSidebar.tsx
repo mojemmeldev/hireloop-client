@@ -17,11 +17,14 @@ import {
     Building2,
     FileText,
     LayoutDashboard,
+    Plus,
+    PlusCircle,
     Settings,
     Users,
     Wallet,
     type LucideIcon,
 } from "lucide-react"
+import Link from "next/link"
 
 export type UserRole = "seeker" | "recruiter" | "admin"
 
@@ -44,10 +47,11 @@ const menuItemsByRole: Record<UserRole, SidebarMenuItemData[]> = {
     ],
     recruiter: [
         { id: "dashboard", name: "Dashboard", url: "/dashboard", Icon: LayoutDashboard },
-        { id: "my-company", name: "My Company", url: "/dashboard/company", Icon: Building2 },
-        { id: "manage-jobs", name: "Manage Jobs", url: "/dashboard/manage-jobs", Icon: Briefcase },
-        { id: "applications", name: "Applications", url: "/dashboard/applications", Icon: FileText },
-        { id: "settings", name: "Settings", url: "/dashboard/settings", Icon: Settings },
+        { id: "my-company", name: "My Company", url: "/dashboard/recruiter/company", Icon: Building2 },
+        { id: "manage-jobs", name: "Manage Jobs", url: "/dashboard/recruiter/jobs", Icon: Briefcase },
+        { id: "add-jobs", name: "Add Jobs", url: "/dashboard/recruiter/jobs/new", Icon: PlusCircle },
+        { id: "applications", name: "Applications", url: "/dashboard/recruiter/applications", Icon: FileText },
+        { id: "settings", name: "Settings", url: "/dashboard/recruiter/settings", Icon: Settings },
     ],
     admin: [
         { id: "dashboard", name: "Dashboard", url: "/dashboard", Icon: LayoutDashboard },
@@ -73,7 +77,7 @@ export function DashboardSidebar() {
                     <SidebarMenu>
                         {items.map((item) => (
                             <SidebarMenuItem key={item.id}>
-                                <SidebarMenuButton render={<a href={item.url} />}>
+                                <SidebarMenuButton render={<Link href={item.url} />}>
                                     <item.Icon />
                                     <span>{item.name}</span>
                                 </SidebarMenuButton>
