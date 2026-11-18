@@ -17,22 +17,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
+import { createJob, NewJobFormData } from "@/lib/actions/jobs";
 
-// Simple flat form state — one key per field
-export type NewJobFormData = {
-    title: string;
-    company: string;
-    category: string;
-    jobType: string;
-    isRemote: boolean;
-    location: string;
-    deadline: string;
-    minSalary: string;
-    maxSalary: string;
-    salaryFrequency: string;
-    responsibilities: string;
-    qualifications: string;
-};
 
 const jobCategories = [
     "Engineering & Tech",
@@ -90,16 +76,17 @@ const NewJobPage = () => {
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+         setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
-    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit (e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        const JobData = {...formData}
         // data is ready — wire to your API / backend later
         console.log("[new-job] form submitted:", formData);
 
-        
-
+        const result = await createJob(JobData)
+        console.log("fetch result ",result);
 
     }
 
@@ -292,8 +279,7 @@ const NewJobPage = () => {
                                     type="date"
                                     value={formData.deadline}
                                     onChange={handleChange}
-                                    onClick={(e) => e.currentTarget.showPicker?.()}
-                                    className={`${inputClass} pl-10 [&::-webkit-calendar-picker-indicator]:opacity-0`}
+                                    className={`${inputClass} pl-10 `}
                                 />
                             </div>
                         </div>
