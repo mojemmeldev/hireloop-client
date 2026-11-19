@@ -18,6 +18,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 import { createJob, NewJobFormData } from "@/lib/actions/jobs";
+import { useRouter } from "next/navigation";
+import { toast } from "@/components/ui/toast";
 
 
 const jobCategories = [
@@ -70,6 +72,7 @@ const NewJobPage = () => {
         responsibilities: "",
         qualifications: "",
     });
+    const router = useRouter()
 
     // one handler for every plain input/textarea
     function handleChange(
@@ -87,6 +90,14 @@ const NewJobPage = () => {
 
         const result = await createJob(JobData)
         console.log("fetch result ",result);
+
+        if (result.insertedId) {
+            toast.add({
+                title: "Job created",
+                description: "The job has beex successfully created.",
+            })
+            router.push('/dashboard/recruiter/jobs');
+        }
 
     }
 

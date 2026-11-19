@@ -26,3 +26,24 @@ export const createJob = async (data: NewJobFormData) => {
     });
     return res.json();
 };
+
+
+export const deleteJob = async (jobId : string)=>{
+    const res = await fetch(`${BASE_URL}/jobs/${jobId}`, {
+        method: "DELETE",        
+    });
+    return res.json();
+}
+
+
+export const updateJob = async ( jobId: string, data: Partial<NewJobFormData> ) => {
+  const res = await fetch(`${BASE_URL}/jobs/${jobId}`, {
+    method: "PATCH",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  return res.json();
+};
