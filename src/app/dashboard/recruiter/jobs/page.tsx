@@ -1,92 +1,29 @@
-
-
-
 import Link from "next/link";
 import { PlusIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
-import type { NewJobFormData } from "@/lib/actions/jobs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { JobPrimaryButton, JobStatusBadge, JobTypeBadge } from "@/components/jobs/job-ui";
+import { JOB_TABLE_COLUMNS } from "@/lib/constants/jobs";
 import { getJobs } from "@/lib/api/jobs";
+import { jobStyles } from "@/lib/styles/jobs";
+import type { JobRow as SharedJobRow } from "@/lib/types/jobs";
+import {
+    formatJobCompensation,
+    formatJobDate,
+    formatPostedAgo,
+    isJobExpired,
+} from "@/lib/utils/jobs";
 import { DeleteJobDialog } from "@/app/components/DeleteJobDialog";
 import UpdateJobForm from "@/app/components/UpdateJobForm";
 
-// A row in the manage-jobs table = what the new-job form stores + listing meta
-export type JobRow = NewJobFormData & {
-    _id: string;
-    applicants: number;
-    postedAt: string; // ISO date "yyyy-mm-dd" (same format as deadline)
-};
-
-
-
-
-// "May 30, 2025" style — parses the ISO date at local midnight so the
-// calendar day never shifts across timezones
-function formatDate(iso: string) {
-    const date = new Date(`${iso}T00:00:00`);
-    return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-    });
-}
-
-function isExpired(iso: string) {
-    const today = new Date().toISOString().slice(0, 10);
-    return iso < today;
-}
-
-// "Posted 4d ago" / "Posted 1w ago" — same phrasing as the figma
-function postedAgo(iso: string) {
-    const days = Math.floor(
-        (Date.now() - new Date(`${iso}T00:00:00`).getTime()) / 86_400_000
-    );
-    if (days <= 0) return "Posted today";
-    if (days === 1) return "Posted 1d ago";
-    if (days < 7) return `Posted ${days}d ago`;
-    return `Posted ${Math.floor(days / 7)}w ago`;
-}
-
-// "90k - 115k / yr" or "40 / hr" (figma style)
-function formatCompensation(job: JobRow) {
-    const suffix: Record<string, string> = {
-        "per hour": "/ hr",
-        "per day": "/ day",
-        "per month": "/ mo",
-        "per year": "/ yr",
-    };
-    const money = (value: string) => {
-        const n = Number(value);
-        if (!value || Number.isNaN(n)) return null;
-        return n >= 1000 ? `${Math.round(n / 1000)}k` : `${n}`;
-    };
-    const min = money(job.minSalary);
-    const max = money(job.maxSalary);
-    const range = min && max ? `${min} - ${max}` : (max ?? min);
-    if (!range) return "—";
-    return `${range} ${suffix[job.salaryFrequency] ?? ""}`.trim();
-}
-
-const columns = [
-    "Job Title & Dept",
-    "Company & Location",
-    "Type",
-    "Compensation",
-    "Applicants",
-    "Deadline",
-    "Status",
-    "Actions",
-];
+// Kept exported for backwards compatibility with existing imports.
+export type JobRow = SharedJobRow;
 
 const RecruiterJobsPage = async () => {
-
-   const jobs: JobRow[] = await getJobs();
-    
-    
+    const jobs: JobRow[] = await getJobs();
 
     return (
-        <div className="flex min-h-[calc(100vh-68px)] flex-col gap-6 bg-[#010103] p-4 sm:p-6">
+        <div className={jobStyles.page}>
             {/* Breadcrumb + heading + action */}
             <div className="flex flex-col gap-4">
                 <nav className="flex items-center gap-1.5 text-xs text-white/50">
@@ -102,7 +39,7 @@ const RecruiterJobsPage = async () => {
 
                 <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                        <p className="font-mono text-xs tracking-wider text-[#645BFF] uppercase">
+                        <p className={jobStyles.eyebrow}>
                             Job Listings &amp; Postings
                         </p>
                         <h1 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-[32px]">
@@ -113,31 +50,26 @@ const RecruiterJobsPage = async () => {
                             job details across your organization.
                         </p>
                     </div>
-                    <Button
-                        render={
-                            <Link href="/dashboard/recruiter/jobs/new" />
-                        }
+                    <JobPrimaryButton
+                        render={<Link href="/dashboard/recruiter/jobs/new" />}
                         nativeButton={false}
-                        className="h-11 shrink-0 bg-[#5C53FE] px-5 text-sm font-medium text-white hover:bg-[#4B43F0]"
+                        className={jobStyles.primaryLarge}
                     >
                         <PlusIcon className="size-4" />
                         New Job Post
-                    </Button>
+                    </JobPrimaryButton>
                 </div>
             </div>
 
-            <div className="h-px bg-white/10" />
+            <div className={jobStyles.divider} />
 
             {/* Listings table — horizontally scrollable on small screens */}
-            <div className="overflow-x-auto rounded-2xl border border-white/5 bg-[#0C0C10]">
+            <div className={jobStyles.panel}>
                 <Table className="min-w-[1120px]">
                     <TableHeader>
-                        <TableRow className="border-white/5 hover:bg-transparent">
-                            {columns.map((column) => (
-                                <TableHead
-                                    key={column}
-                                    className="px-4 py-3 font-mono text-xs tracking-wider text-white/40 uppercase"
-                                >
+                        <TableRow className={jobStyles.tableHeadRow}>
+                            {JOB_TABLE_COLUMNS.map((column) => (
+                                <TableHead key={column} className={jobStyles.tableHead}>
                                     {column}
                                 </TableHead>
                             ))}
@@ -145,23 +77,20 @@ const RecruiterJobsPage = async () => {
                     </TableHeader>
                     <TableBody>
                         {jobs.length === 0 && (
-                            <TableRow className="border-white/5 hover:bg-transparent">
+                            <TableRow className={jobStyles.tableHeadRow}>
                                 <TableCell
-                                    colSpan={columns.length}
-                                    className="px-4 py-10 text-center text-sm text-white/40"
+                                    colSpan={JOB_TABLE_COLUMNS.length}
+                                    className={jobStyles.emptyCell}
                                 >
                                     No job posts yet. Create your first listing.
                                 </TableCell>
                             </TableRow>
                         )}
                         {jobs.map((job) => {
-                            const expired = isExpired(job.deadline);
+                            const expired = isJobExpired(job.deadline);
                             return (
-                                <TableRow
-                                    key={job._id}
-                                    className="border-white/5 hover:bg-white/[0.03]"
-                                >
-                                    <TableCell className="px-4 py-4 align-top">
+                                <TableRow key={job._id} className={jobStyles.tableRow}>
+                                    <TableCell className={jobStyles.tableCell}>
                                         <p className="font-medium text-white">
                                             {job.title}
                                         </p>
@@ -169,7 +98,7 @@ const RecruiterJobsPage = async () => {
                                             {job.category}
                                         </p>
                                     </TableCell>
-                                    <TableCell className="px-4 py-4 align-top">
+                                    <TableCell className={jobStyles.tableCell}>
                                         <p className="text-sm font-medium text-white/90">
                                             {job.company}
                                         </p>
@@ -177,55 +106,30 @@ const RecruiterJobsPage = async () => {
                                             {job.location}
                                         </p>
                                     </TableCell>
-                                    <TableCell className="px-4 py-4 align-top">
-                                        <span className="inline-block rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/70">
-                                            {job.jobType}
-                                        </span>
+                                    <TableCell className={jobStyles.tableCell}>
+                                        <JobTypeBadge>{job.jobType}</JobTypeBadge>
                                     </TableCell>
-                                    <TableCell className="px-4 py-4 align-top text-sm whitespace-nowrap text-white/80">
-                                        {formatCompensation(job)}
+                                    <TableCell className={`${jobStyles.tableCell} text-sm whitespace-nowrap text-white/80`}>
+                                        {formatJobCompensation(job)}
                                     </TableCell>
-                                    <TableCell className="px-4 py-4 align-top text-sm whitespace-nowrap text-white/80">
+                                    <TableCell className={`${jobStyles.tableCell} text-sm whitespace-nowrap text-white/80`}>
                                         {job.applicants} Candidates
                                     </TableCell>
-                                    <TableCell className="px-4 py-4 align-top whitespace-nowrap">
+                                    <TableCell className={`${jobStyles.tableCell} whitespace-nowrap`}>
                                         <p className="text-sm text-white/90">
-                                            {formatDate(job.deadline)}
+                                            {formatJobDate(job.deadline)}
                                         </p>
                                         <p className="mt-0.5 text-xs text-white/40">
-                                            {postedAgo(job.postedAt)}
+                                            {formatPostedAgo(job.postedAt)}
                                         </p>
                                     </TableCell>
-
-
-
-                                    <TableCell className="px-4 py-4 align-top">
-                                        <span
-                                            className={
-                                                expired 
-                                                    ? "inline-block rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-xs font-medium text-red-400"
-                                                    : "inline-block rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400"
-                                            }
-                                        >
-                                            {expired  ? "Expired" : "Active"} 
-                                        </span>
+                                    <TableCell className={jobStyles.tableCell}>
+                                        <JobStatusBadge expired={expired} />
                                     </TableCell>
-
-
-                                    
-                                    <TableCell className="px-4 py-4 align-top">
-
-
-                                        <div className="flex items-center gap-1.5">
-
-
-                                                
+                                    <TableCell className={jobStyles.tableCell}>
+                                        <div className={jobStyles.tableActions}>
                                             <UpdateJobForm job={job} />
-
-
-                                            <DeleteJobDialog job={job}></DeleteJobDialog>
-                                            
-                                           
+                                            <DeleteJobDialog job={job} />
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -239,8 +143,6 @@ const RecruiterJobsPage = async () => {
                 Showing {jobs.length === 0 ? 0 : 1}-{jobs.length} of{" "}
                 {jobs.length} jobs
             </p>
-
-           
         </div>
     );
 };

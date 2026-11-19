@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 import {
     ArrowRightIcon,
@@ -11,78 +11,42 @@ import {
     MapPinIcon,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
-import { createJob, NewJobFormData } from "@/lib/actions/jobs";
-import { useRouter } from "next/navigation";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { useRouter } from "next/navigation";
+import {
+    FormField,
+    FormSection,
+    JobCategorySelect,
+    JobTypeToggleGroup,
+    SalaryFrequencySelect,
+} from "@/components/jobs/job-form";
+import { JobPrimaryButton } from "@/components/jobs/job-ui";
+import { createJob } from "@/lib/actions/jobs";
+import { EMPTY_JOB_FORM } from "@/lib/constants/jobs";
+import { jobStyles } from "@/lib/styles/jobs";
+import type { NewJobFormData } from "@/lib/types/jobs";
+import { cn } from "@/lib/utils";
 
-
-const jobCategories = [
-    "Engineering & Tech",
-    "Design",
-    "Product",
-    "Marketing",
-    "Sales",
-    "Finance",
-    "Operations",
-    "Customer Support",
-];
-
-const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"];
-
-const salaryFrequencies = ["per hour", "per day", "per month", "per year"];
-
-const labelClass = "text-sm font-medium text-white/90";
-const requiredMark = <span className="text-[#645BFF]">*</span>;
-const inputClass =
-    "h-12 w-full rounded-lg border border-white/5 bg-[#151519] px-4 text-sm text-white placeholder:text-white/45 focus-visible:border-[#5C53FE] focus-visible:ring-[#5C53FE]/40";
-
-// Panel with purple dot + title, matching the figma sections
-function FormSection({ number, title, children, }: { number: number; title: string; children: React.ReactNode; }) {
-    return (
-        <section className="rounded-2xl border border-white/5 bg-[#0C0C10] p-5 sm:p-6">
-            <div className="mb-5 flex items-center gap-2.5">
-                <span className="size-2 rounded-full bg-[#5C53FE] shadow-[0_0_8px_#5C53FE]" />
-                <h2 className="text-lg font-semibold text-white">
-                    {number}. {title}
-                </h2>
-            </div>
-            <div className="flex flex-col gap-5">{children}</div>
-        </section>
-    );
-}
+const requiredMark = <span className={jobStyles.required}>*</span>;
 
 const NewJobPage = () => {
     const [formData, setFormData] = useState<NewJobFormData>({
-        title: "",
-        company: "",
-        category: "Engineering & Tech",
-        jobType: "Full-time",
-        isRemote: false,
-        location: "",
-        deadline: "",
-        minSalary: "",
-        maxSalary: "",
-        salaryFrequency: "per hour",
-        responsibilities: "",
-        qualifications: "",
+        ...EMPTY_JOB_FORM,
     });
     const router = useRouter()
 
     // one handler for every plain input/textarea
     function handleChange(
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) {
         const { name, value } = e.target;
-         setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
-    async function handleSubmit (e: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const JobData = {...formData}
         // data is ready — wire to your API / backend later
@@ -102,7 +66,7 @@ const NewJobPage = () => {
     }
 
     return (
-        <div className="flex min-h-[calc(100vh-68px)] flex-col gap-6 bg-[#010103] p-4 sm:p-6">
+        <div className={jobStyles.page}>
             {/* Breadcrumb + heading + action */}
             <div className="flex flex-col gap-4">
                 <nav className="flex items-center gap-1.5 text-xs text-white/50">
@@ -130,7 +94,7 @@ const NewJobPage = () => {
                 </div>
             </div>
 
-            <div className="h-px bg-white/10" />
+            <div className={jobStyles.divider} />
 
             <form
                 id="new-job-form"
@@ -139,10 +103,7 @@ const NewJobPage = () => {
             >
                 {/* 1. Basic Information */}
                 <FormSection number={1} title="Basic Information">
-                    <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="title" className={labelClass}>
-                            Job Title {requiredMark}
-                        </Label>
+                    <FormField id="title" label={<>Job Title {requiredMark}</>}>
                         <Input
                             id="title"
                             name="title"
@@ -150,15 +111,15 @@ const NewJobPage = () => {
                             placeholder="Frontend Developer"
                             value={formData.title}
                             onChange={handleChange}
-                            className={inputClass}
+                            className={jobStyles.input}
                         />
-                    </div>
+                    </FormField>
 
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="company" className={labelClass}>
-                                Company Name {requiredMark}
-                            </Label>
+                        <FormField
+                            id="company"
+                            label={<>Company Name {requiredMark}</>}
+                        >
                             <div className="relative">
                                 <Building2Icon className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-white/40" />
                                 <Input
@@ -168,71 +129,43 @@ const NewJobPage = () => {
                                     placeholder="HirePulse Network"
                                     value={formData.company}
                                     onChange={handleChange}
-                                    className={`${inputClass} pl-10`}
+                                    className={cn(jobStyles.input, "pl-10")}
                                 />
                             </div>
-                        </div>
+                        </FormField>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label className={labelClass}>
-                                Job Category {requiredMark}
-                            </Label>
-                            <Select
+                        <FormField label={<>Job Category {requiredMark}</>}>
+                            <JobCategorySelect
                                 value={formData.category}
                                 onValueChange={(value) =>
-                                    setFormData((prev) => ({ ...prev, category: value ?? "" }))
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        category: value ?? "",
+                                    }))
                                 }
-                            >
-                                <SelectTrigger className="h-12 w-full rounded-lg border border-white/5 bg-[#151519] text-sm text-white">
-                                    <SelectValue placeholder="Select category" />
-                                </SelectTrigger>
-                                <SelectContent className="border-white/10 bg-[#141418] text-white">
-                                    {jobCategories.map((category) => (
-                                        <SelectItem key={category} value={category}>
-                                            {category}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                                placeholder="Select category"
+                                triggerClassName={jobStyles.selectTrigger}
+                            />
+                        </FormField>
                     </div>
 
                     {/* Job Type — segmented control */}
-                    <div className="flex flex-col gap-1.5">
-                        <Label className={labelClass}>
-                            Job Type {requiredMark}
-                        </Label>
-                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                            {jobTypes.map((type) => {
-                                const isSelected = formData.jobType === type;
-                                return (
-                                    <button
-                                        key={type}
-                                        type="button"
-                                        aria-pressed={isSelected}
-                                        onClick={() =>
-                                            setFormData((prev) => ({ ...prev, jobType: type }))
-                                        }
-                                        className={
-                                            isSelected
-                                                ? "h-12 rounded-lg border border-[#5C53FE] bg-[#5C53FE]/10 text-sm font-medium text-white"
-                                                : "h-12 rounded-lg border border-white/10 bg-[#151519] text-sm text-white/60 transition-colors hover:text-white"
-                                        }
-                                    >
-                                        {type}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
+                    <FormField label={<>Job Type {requiredMark}</>}>
+                        <JobTypeToggleGroup
+                            value={formData.jobType}
+                            onChange={(jobType) =>
+                                setFormData((prev) => ({ ...prev, jobType }))
+                            }
+                        />
+                    </FormField>
                 </FormSection>
 
                 {/* 2. Location, Compensation & Timeline */}
                 <FormSection number={2} title="Location, Compensation & Timeline">
                     {/* Remote toggle row */}
-                    <div className="flex items-center justify-between gap-4 rounded-xl border border-white/5 bg-[#151519] p-4">
+                    <div className={jobStyles.remotePanel}>
                         <div className="flex items-center gap-3">
-                            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#5C53FE]/15 text-[#645BFF]">
+                            <span className={jobStyles.remoteIcon}>
                                 <GlobeIcon className="size-4.5" />
                             </span>
                             <div>
@@ -257,13 +190,11 @@ const NewJobPage = () => {
                     </div>
 
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                        <div className="flex flex-col gap-1.5">
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="location" className={labelClass}>
-                                    Job Location (location)
-                                </Label>
-                                <span className="text-[11px] text-white/35">Required</span>
-                            </div>
+                        <FormField
+                            id="location"
+                            label="Job Location (location)"
+                            hint="Required"
+                        >
                             <div className="relative">
                                 <MapPinIcon className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-white/40" />
                                 <Input
@@ -273,15 +204,15 @@ const NewJobPage = () => {
                                     placeholder="New York, USA"
                                     value={formData.location}
                                     onChange={handleChange}
-                                    className={`${inputClass} pl-10`}
+                                    className={cn(jobStyles.input, "pl-10")}
                                 />
                             </div>
-                        </div>
+                        </FormField>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="deadline" className={labelClass}>
-                                Application Deadline (deadline)
-                            </Label>
+                        <FormField
+                            id="deadline"
+                            label="Application Deadline (deadline)"
+                        >
                             <div className="relative">
                                 <CalendarIcon className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-white/40" />
                                 <Input
@@ -290,17 +221,14 @@ const NewJobPage = () => {
                                     type="date"
                                     value={formData.deadline}
                                     onChange={handleChange}
-                                    className={`${inputClass} pl-10 `}
+                                    className={cn(jobStyles.input, "pl-10")}
                                 />
                             </div>
-                        </div>
+                        </FormField>
                     </div>
 
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="minSalary" className={labelClass}>
-                                Min Salary / Rate
-                            </Label>
+                        <FormField id="minSalary" label="Min Salary / Rate">
                             <div className="relative">
                                 <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-white/60">
                                     €
@@ -313,15 +241,12 @@ const NewJobPage = () => {
                                     placeholder="25"
                                     value={formData.minSalary}
                                     onChange={handleChange}
-                                    className={`${inputClass} pl-8`}
+                                    className={cn(jobStyles.input, "pl-8")}
                                 />
                             </div>
-                        </div>
+                        </FormField>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="maxSalary" className={labelClass}>
-                                Max Salary / Rate
-                            </Label>
+                        <FormField id="maxSalary" label="Max Salary / Rate">
                             <div className="relative">
                                 <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-white/60">
                                     €
@@ -334,14 +259,13 @@ const NewJobPage = () => {
                                     placeholder="40"
                                     value={formData.maxSalary}
                                     onChange={handleChange}
-                                    className={`${inputClass} pl-8`}
+                                    className={cn(jobStyles.input, "pl-8")}
                                 />
                             </div>
-                        </div>
+                        </FormField>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label className={labelClass}>Frequency</Label>
-                            <Select
+                        <FormField label="Frequency">
+                            <SalaryFrequencySelect
                                 value={formData.salaryFrequency}
                                 onValueChange={(value) =>
                                     setFormData((prev) => ({
@@ -349,28 +273,18 @@ const NewJobPage = () => {
                                         salaryFrequency: value ?? "",
                                     }))
                                 }
-                            >
-                                <SelectTrigger className="h-12 w-full rounded-lg border border-white/5 bg-[#151519] text-sm text-white">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="border-white/10 bg-[#141418] text-white">
-                                    {salaryFrequencies.map((frequency) => (
-                                        <SelectItem key={frequency} value={frequency}>
-                                            {frequency}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                                triggerClassName={jobStyles.selectTrigger}
+                            />
+                        </FormField>
                     </div>
                 </FormSection>
 
                 {/* 3. Responsibilities & Requirements */}
                 <FormSection number={3} title="Responsibilities & Requirements">
-                    <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="responsibilities" className={labelClass}>
-                            Key Responsibilities {requiredMark}
-                        </Label>
+                    <FormField
+                        id="responsibilities"
+                        label={<>Key Responsibilities {requiredMark}</>}
+                    >
                         <Textarea
                             id="responsibilities"
                             name="responsibilities"
@@ -379,14 +293,14 @@ const NewJobPage = () => {
                             placeholder="Showcase your commitment to delivering exceptional user interfaces and digital experiences. You will collaborate directly with systems designers and backend engineers to craft responsive, micro-interaction rich products."
                             value={formData.responsibilities}
                             onChange={handleChange}
-                            className={`${inputClass} min-h-32 resize-y px-4 py-3 leading-relaxed`}
+                            className={cn(jobStyles.input, jobStyles.textarea)}
                         />
-                    </div>
+                    </FormField>
 
-                    <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="qualifications" className={labelClass}>
-                            Qualifications & Requirements {requiredMark}
-                        </Label>
+                    <FormField
+                        id="qualifications"
+                        label={<>Qualifications & Requirements {requiredMark}</>}
+                    >
                         <Textarea
                             id="qualifications"
                             name="qualifications"
@@ -397,19 +311,19 @@ const NewJobPage = () => {
                             }
                             value={formData.qualifications}
                             onChange={handleChange}
-                            className={`${inputClass} min-h-32 resize-y px-4 py-3 leading-relaxed`}
+                            className={cn(jobStyles.input, jobStyles.textarea)}
                         />
-                    </div>
+                    </FormField>
                 </FormSection>
                 <section>
-                    <Button
+                    <JobPrimaryButton
                         type="submit"
                         form="new-job-form"
-                        className="h-11 shrink-0 bg-[#5C53FE] px-5 text-sm font-medium text-white hover:bg-[#4B43F0]"
+                        className={jobStyles.primaryLarge}
                     >
                         Publish Job
                         <ArrowRightIcon className="size-4" />
-                    </Button>
+                    </JobPrimaryButton>
                 </section>
             </form>
         </div>

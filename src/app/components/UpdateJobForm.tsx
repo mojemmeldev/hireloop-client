@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { SquarePenIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -13,41 +13,24 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { updateJob, type NewJobFormData } from "@/lib/actions/jobs";
-import type { JobRow } from "@/app/dashboard/recruiter/jobs/page";
 import { toast } from "@/components/ui/toast";
-import { useRouter } from "next/navigation";
-
-const jobCategories = [
-    "Engineering & Tech",
-    "Design",
-    "Product",
-    "Marketing",
-    "Sales",
-    "Finance",
-    "Operations",
-    "Customer Support",
-];
-
-const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"];
-const salaryFrequencies = ["per hour", "per day", "per month", "per year"];
-
-const labelClass = "text-xs font-medium text-white/80";
-const inputClass =
-    "h-10 w-full rounded-lg border border-white/10 bg-[#151519] px-3 text-sm text-white placeholder:text-white/40 focus-visible:border-[#5C53FE] focus-visible:ring-[#5C53FE]/40";
+import {
+    FormField,
+    JobCategorySelect,
+    JobTypeSelect,
+    SalaryFrequencySelect,
+} from "@/components/jobs/job-form";
+import { JobPrimaryButton } from "@/components/jobs/job-ui";
+import { updateJob } from "@/lib/actions/jobs";
+import { jobStyles } from "@/lib/styles/jobs";
+import type { JobRow, NewJobFormData } from "@/lib/types/jobs";
+import { jobFieldId } from "@/lib/utils/jobs";
+import { cn } from "@/lib/utils";
 
 export default function UpdateJobForm({ job }: { job: JobRow }) {
-    const router = useRouter()
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState<NewJobFormData>({
         title: job.title,
@@ -64,8 +47,6 @@ export default function UpdateJobForm({ job }: { job: JobRow }) {
         qualifications: job.qualifications,
     });
 
-    const fieldId = (name: string) => `update-${job._id}-${name}`;
-
     function handleChange(
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) {
@@ -76,34 +57,31 @@ export default function UpdateJobForm({ job }: { job: JobRow }) {
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        // TODO: call updateJob(job._id, formData) here when you add the functionality.
         console.log("[update-job] form submitted:", job._id, formData);
 
-        const res = await updateJob(job._id, formData)
-            console.log(res);
-                if (res.acknowledged) {
-                    setOpen(false)
-                    toast.add({
-                        title: "update created",
-                        description: "updated successfully",
-                    })
-                    router.push('/dashboard/recruiter/jobs');
-                }
-        
-
+        const res = await updateJob(job._id, formData);
+        console.log(res);
+        if (res.acknowledged) {
+            setOpen(false);
+            toast.add({
+                title: "update created",
+                description: "updated successfully",
+            });
+            router.push("/dashboard/recruiter/jobs");
+        }
     }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <Button
+            <JobPrimaryButton
                 type="button"
                 aria-label={`Update ${job.title}`}
                 onClick={() => setOpen(true)}
-                className="h-8 w-[81px] gap-1.5 rounded-lg bg-[#5C53FE] px-2.5 text-xs text-[#C3C0FF] hover:bg-[#4B43F0]"
+                className={jobStyles.primaryCompact}
             >
                 <SquarePenIcon className="size-[18px]" />
                 Update
-            </Button>
+            </JobPrimaryButton>
 
             <DialogContent className="max-h-[85vh] overflow-y-auto border border-white/10 bg-[#0C0C10] text-white sm:max-w-2xl">
                 <DialogHeader>
@@ -114,118 +92,109 @@ export default function UpdateJobForm({ job }: { job: JobRow }) {
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-1.5">
-                        <Label htmlFor={fieldId("title")} className={labelClass}>
-                            Job Title
-                        </Label>
+                    <FormField
+                        id={jobFieldId(job._id, "title")}
+                        label="Job Title"
+                        labelClassName={jobStyles.compactLabel}
+                    >
                         <Input
-                            id={fieldId("title")}
+                            id={jobFieldId(job._id, "title")}
                             name="title"
                             required
                             value={formData.title}
                             onChange={handleChange}
-                            className={inputClass}
+                            className={jobStyles.compactInput}
                         />
-                    </div>
+                    </FormField>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor={fieldId("company")} className={labelClass}>
-                                Company
-                            </Label>
+                        <FormField
+                            id={jobFieldId(job._id, "company")}
+                            label="Company"
+                            labelClassName={jobStyles.compactLabel}
+                        >
                             <Input
-                                id={fieldId("company")}
+                                id={jobFieldId(job._id, "company")}
                                 name="company"
                                 required
                                 value={formData.company}
                                 onChange={handleChange}
-                                className={inputClass}
+                                className={jobStyles.compactInput}
                             />
-                        </div>
+                        </FormField>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor={fieldId("category")} className={labelClass}>
-                                Category
-                            </Label>
-                            <Select
+                        <FormField
+                            id={jobFieldId(job._id, "category")}
+                            label="Category"
+                            labelClassName={jobStyles.compactLabel}
+                        >
+                            <JobCategorySelect
+                                id={jobFieldId(job._id, "category")}
                                 value={formData.category}
                                 onValueChange={(value) =>
                                     setFormData((prev) => ({
                                         ...prev,
-                                        category: value ?? "",
+                                        category: value,
                                     }))
                                 }
-                            >
-                                <SelectTrigger id={fieldId("category")} className={inputClass}>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="border-white/10 bg-[#141418] text-white">
-                                    {jobCategories.map((category) => (
-                                        <SelectItem key={category} value={category}>
-                                            {category}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                                triggerClassName={jobStyles.compactSelectTrigger}
+                            />
+                        </FormField>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label className={labelClass}>Job Type</Label>
-                            <Select
+                        <FormField
+                            label="Job Type"
+                            labelClassName={jobStyles.compactLabel}
+                        >
+                            <JobTypeSelect
                                 value={formData.jobType}
                                 onValueChange={(value) =>
                                     setFormData((prev) => ({
                                         ...prev,
-                                        jobType: value ?? "",
+                                        jobType: value,
                                     }))
                                 }
-                            >
-                                <SelectTrigger className={inputClass}>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="border-white/10 bg-[#141418] text-white">
-                                    {jobTypes.map((type) => (
-                                        <SelectItem key={type} value={type}>
-                                            {type}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                                triggerClassName={jobStyles.compactSelectTrigger}
+                            />
+                        </FormField>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor={fieldId("location")} className={labelClass}>
-                                Location
-                            </Label>
+                        <FormField
+                            id={jobFieldId(job._id, "location")}
+                            label="Location"
+                            labelClassName={jobStyles.compactLabel}
+                        >
                             <Input
-                                id={fieldId("location")}
+                                id={jobFieldId(job._id, "location")}
                                 name="location"
                                 value={formData.location}
                                 onChange={handleChange}
-                                className={inputClass}
+                                className={jobStyles.compactInput}
                             />
-                        </div>
+                        </FormField>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor={fieldId("deadline")} className={labelClass}>
-                                Deadline
-                            </Label>
+                        <FormField
+                            id={jobFieldId(job._id, "deadline")}
+                            label="Deadline"
+                            labelClassName={jobStyles.compactLabel}
+                        >
                             <Input
-                                id={fieldId("deadline")}
+                                id={jobFieldId(job._id, "deadline")}
                                 name="deadline"
                                 type="date"
                                 value={formData.deadline}
                                 onChange={handleChange}
-                                className={inputClass}
+                                className={jobStyles.compactInput}
                             />
-                        </div>
+                        </FormField>
 
                         <div className="flex items-center justify-between gap-4 rounded-lg border border-white/10 bg-[#151519] px-3">
-                            <Label htmlFor={fieldId("isRemote")} className={labelClass}>
+                            <label
+                                htmlFor={jobFieldId(job._id, "isRemote")}
+                                className={jobStyles.compactLabel}
+                            >
                                 Remote work allowed
-                            </Label>
+                            </label>
                             <Switch
-                                id={fieldId("isRemote")}
+                                id={jobFieldId(job._id, "isRemote")}
                                 checked={formData.isRemote}
                                 onCheckedChange={(checked) =>
                                     setFormData((prev) => ({
@@ -236,102 +205,98 @@ export default function UpdateJobForm({ job }: { job: JobRow }) {
                             />
                         </div>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor={fieldId("minSalary")} className={labelClass}>
-                                Minimum salary
-                            </Label>
+                        <FormField
+                            id={jobFieldId(job._id, "minSalary")}
+                            label="Minimum salary"
+                            labelClassName={jobStyles.compactLabel}
+                        >
                             <Input
-                                id={fieldId("minSalary")}
+                                id={jobFieldId(job._id, "minSalary")}
                                 name="minSalary"
                                 inputMode="numeric"
                                 value={formData.minSalary}
                                 onChange={handleChange}
-                                className={inputClass}
+                                className={jobStyles.compactInput}
                             />
-                        </div>
+                        </FormField>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor={fieldId("maxSalary")} className={labelClass}>
-                                Maximum salary
-                            </Label>
+                        <FormField
+                            id={jobFieldId(job._id, "maxSalary")}
+                            label="Maximum salary"
+                            labelClassName={jobStyles.compactLabel}
+                        >
                             <Input
-                                id={fieldId("maxSalary")}
+                                id={jobFieldId(job._id, "maxSalary")}
                                 name="maxSalary"
                                 inputMode="numeric"
                                 value={formData.maxSalary}
                                 onChange={handleChange}
-                                className={inputClass}
+                                className={jobStyles.compactInput}
                             />
-                        </div>
+                        </FormField>
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
-                        <Label className={labelClass}>Salary frequency</Label>
-                        <Select
+                    <FormField label="Salary frequency" labelClassName={jobStyles.compactLabel}>
+                        <SalaryFrequencySelect
                             value={formData.salaryFrequency}
                             onValueChange={(value) =>
                                 setFormData((prev) => ({
                                     ...prev,
-                                    salaryFrequency: value ?? "",
+                                    salaryFrequency: value,
                                 }))
                             }
-                        >
-                            <SelectTrigger className={inputClass}>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="border-white/10 bg-[#141418] text-white">
-                                {salaryFrequencies.map((frequency) => (
-                                    <SelectItem key={frequency} value={frequency}>
-                                        {frequency}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                            triggerClassName={jobStyles.compactSelectTrigger}
+                        />
+                    </FormField>
 
-                    <div className="flex flex-col gap-1.5">
-                        <Label htmlFor={fieldId("responsibilities")} className={labelClass}>
-                            Responsibilities
-                        </Label>
+                    <FormField
+                        id={jobFieldId(job._id, "responsibilities")}
+                        label="Responsibilities"
+                        labelClassName={jobStyles.compactLabel}
+                    >
                         <Textarea
-                            id={fieldId("responsibilities")}
+                            id={jobFieldId(job._id, "responsibilities")}
                             name="responsibilities"
                             rows={3}
                             value={formData.responsibilities}
                             onChange={handleChange}
-                            className={`${inputClass} h-auto py-2`}
+                            className={cn(
+                                jobStyles.compactInput,
+                                jobStyles.compactTextarea
+                            )}
                         />
-                    </div>
+                    </FormField>
 
-                    <div className="flex flex-col gap-1.5">
-                        <Label htmlFor={fieldId("qualifications")} className={labelClass}>
-                            Qualifications
-                        </Label>
+                    <FormField
+                        id={jobFieldId(job._id, "qualifications")}
+                        label="Qualifications"
+                        labelClassName={jobStyles.compactLabel}
+                    >
                         <Textarea
-                            id={fieldId("qualifications")}
+                            id={jobFieldId(job._id, "qualifications")}
                             name="qualifications"
                             rows={3}
                             value={formData.qualifications}
                             onChange={handleChange}
-                            className={`${inputClass} h-auto py-2`}
+                            className={cn(
+                                jobStyles.compactInput,
+                                jobStyles.compactTextarea
+                            )}
                         />
-                    </div>
+                    </FormField>
 
                     <DialogFooter className="-mx-4 -mb-4 mt-2 border-white/10 bg-transparent">
-                        <Button
+                        <JobPrimaryButton
                             type="button"
                             variant="outline"
                             onClick={() => setOpen(false)}
-                            className="border-white/10 bg-white/5 text-white hover:bg-white/10"
+                            className={jobStyles.secondaryButton}
                         >
                             Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            className="bg-[#5C53FE] text-white hover:bg-[#4B43F0]"
-                        >
+                        </JobPrimaryButton>
+                        <JobPrimaryButton type="submit">
                             Save changes
-                        </Button>
+                        </JobPrimaryButton>
                     </DialogFooter>
                 </form>
             </DialogContent>
