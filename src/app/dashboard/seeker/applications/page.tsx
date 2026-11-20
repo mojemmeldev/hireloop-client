@@ -1,8 +1,20 @@
-import { ApplicationsView } from "@/components/applications/applications-view";
-import { DUMMY_APPLICATIONS } from "@/lib/constants/applications";
+import { headers } from "next/headers";
 
-const ApplicationsPage = () => {
-    return <ApplicationsView applications={DUMMY_APPLICATIONS} />;
+import { ApplicationsView } from "@/components/applications/applications-view";
+import { getApplications } from "@/lib/actions/applications";
+import { auth } from "@/lib/auth";
+
+const ApplicationsPage = async () => {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+
+    const applicantId = session?.user.id;
+    const applications = applicantId
+        ? await getApplications(`applicantId=${encodeURIComponent(applicantId)}`)
+        : [];
+
+    return <ApplicationsView applications={applications} />;
 };
 
 export default ApplicationsPage;

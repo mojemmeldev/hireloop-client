@@ -1,18 +1,27 @@
-import {
-    COMPANY_LOGO_STYLES,
-    STATUS_BADGE_STYLES,
-} from "@/lib/constants/applications";
-import type { ApplicationStatus } from "@/lib/types/applications";
+import { STATUS_BADGE_STYLES } from "@/lib/constants/applications";
+import type { Application, ApplicationStatus } from "@/lib/types/applications";
+
+const COMPANY_LOGO_CLASSES = [
+    "bg-[#C6C6C7] text-[#0B0B0C]",
+    "bg-[#474746] text-[#EDEDEF]",
+    "bg-[#222228] text-[#EDEDEF]",
+    "bg-[#93000A] text-[#FFFFFF]",
+    "border border-white/10 bg-[#222228] text-[#EDEDEF]",
+] as const;
+
+export type ApplicationStat = {
+    label: string;
+    value: string;
+    valueClassName: string;
+};
 
 export function getCompanyInitial(companyName: string) {
     return companyName.trim().charAt(0).toUpperCase() || "?";
 }
 
 export function getCompanyLogoClass(companyName: string) {
-    return (
-        COMPANY_LOGO_STYLES[companyName] ??
-        "border border-white/10 bg-[#222228] text-[#EDEDEF]"
-    );
+    const hash = [...companyName].reduce((total, char) => total + char.charCodeAt(0), 0);
+    return COMPANY_LOGO_CLASSES[hash % COMPANY_LOGO_CLASSES.length];
 }
 
 export function getStatusBadgeClass(status: ApplicationStatus) {
@@ -40,4 +49,39 @@ export function formatAppliedAt(value: string) {
         day: "numeric",
         year: "numeric",
     });
+}
+
+function countByStatus(applications: Application[], statuses: ApplicationStatus[]) {
+    return applications.filter((application) => statuses.includes(application.status)).length;
+}
+
+export function getApplicationStats(applications: Application[]): ApplicationStat[] {
+    const total = applications.length;
+    const shortlisted = countByStatus(applications, ["Shortlisted", "Offered"]);
+    const interviews = countByStatus(applications, ["Review"]);
+    const offers = countByStatus(applications, ["Offered"]);
+    const successRate = total === 0 ? 0 : Math.round((offers / total) * 100);
+
+    return [
+        {
+            label: "Total Applied",
+            value: String(total),
+            valueClassName: "text-[#EDEDEF]",
+        },
+        {
+            label: "Shortlisted",
+            value: String(shortlisted),
+            valueClassName: "text-[#EDEDEF]",
+        },
+        {
+            label: "Interviews",
+            value: String(interviews),
+            valueClassName: "text-[#F59E0B]",
+        },
+        {
+            label: "Success Rate",
+            value: `${successRate}%`,
+            valueClassName: "text-[#22C55E]",
+        },
+    ];
 }

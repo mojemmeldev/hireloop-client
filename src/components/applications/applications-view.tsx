@@ -13,7 +13,7 @@ export function ApplicationsView({ applications }: { applications: Application[]
             <div className={applicationsStyles.content}>
                 <ApplicationsTopBar />
                 <ApplicationsHeader />
-                <ApplicationsStats />
+                <ApplicationsStats applications={applications} />
 
                 {activeApplications.length > 0 ? (
                     <ApplicationsTable applications={activeApplications} />

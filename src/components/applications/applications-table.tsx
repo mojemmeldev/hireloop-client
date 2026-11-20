@@ -100,7 +100,7 @@ export function ApplicationsTable({ applications }: { applications: Application[
 
             <div className={applicationsStyles.pagination}>
                 <p className={applicationsStyles.paginationLabel}>
-                    Showing 1-{applications.length} of 24 applications
+                    Showing 1-{applications.length} of {applications.length} applications
                 </p>
                 <div className={applicationsStyles.paginationControls}>
                     <button

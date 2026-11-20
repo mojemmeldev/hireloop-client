@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import type { NewApplication } from "@/lib/types/applications";
+import type { Application, NewApplication } from "@/lib/types/applications";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URI || "http://localhost:5000";
 
@@ -47,3 +47,15 @@ export async function applyToJob(data: NewApplication) {
 export async function applyToAJOb(data: NewApplication) {
     return applyToJob(data);
 }
+
+export const getApplications = async (query = ""): Promise<Application[]> => {
+    const res = await fetch(`${BASE_URL}/applications?${query}`, {
+        cache: "no-store",
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to load applications");
+    }
+
+    return res.json();
+};
