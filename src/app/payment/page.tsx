@@ -1,11 +1,7 @@
-import React from 'react';
+import { PaymentView } from "@/components/payment/payment-view";
 
 const PaymentPage = () => {
-    return (
-        <div>
-            <h2>payment page</h2>
-        </div>
-    );
+    return <PaymentView />;
 };
 
 export default PaymentPage;
