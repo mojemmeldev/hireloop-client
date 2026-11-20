@@ -23,6 +23,7 @@ const BrowserJobsPage = async ({ searchParams, }: { searchParams: Promise<Search
         }
     }
     const query = search.toString();
+    
 
     const jobs: JobRow[] = await getJobs(query as "");
 

@@ -7,6 +7,7 @@ import { JOB_CATEGORIES, JOB_TYPES } from "@/lib/constants/jobs";
 import { browseJobsStyles } from "@/lib/styles/browse-jobs";
 import { formatFilterCount } from "@/lib/utils/browse-jobs";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export type BrowseJobFilters = {
     jobType: string;
@@ -51,11 +52,18 @@ function readFilters(form: HTMLFormElement): BrowseJobFilters {
     };
 }
 
-export function BrowseJobsSearch({ initialQuery = "", onSearch }: SearchProps) {
+export function BrowseJobsSearch({ initialQuery = "" }: SearchProps) {
+    const router = useRouter()
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const query = String(new FormData(event.currentTarget).get("query") ?? "");
-        onSearch?.(query);
+        const formData = new FormData(event.currentTarget);
+        const data = Object.fromEntries(formData.entries())
+        console.log(data);
+        const search = data.searchField;
+        const params = new URLSearchParams();
+        params.set("search", search as string)
+        router.push(`/browser-jobs?${params.toString()}`)
+
     }
 
     return (
@@ -64,7 +72,7 @@ export function BrowseJobsSearch({ initialQuery = "", onSearch }: SearchProps) {
                 <div className={browseJobsStyles.searchInputWrap}>
                     <SearchIcon className={browseJobsStyles.searchIcon} />
                     <input
-                        name="query"
+                        name="searchField"
                         defaultValue={initialQuery}
                         placeholder="Search by job title, keywords..."
                         aria-label="Search jobs"
@@ -78,6 +86,9 @@ export function BrowseJobsSearch({ initialQuery = "", onSearch }: SearchProps) {
         </form>
     );
 }
+
+
+
 
 function FilterOption({
     name,
@@ -121,13 +132,7 @@ function FilterOption({
     );
 }
 
-export function FilterGroup({
-    title,
-    children,
-}: {
-    title: string;
-    children: ReactNode;
-}) {
+export function FilterGroup({ title, children, }: { title: string; children: ReactNode; }) {
     return (
         <div className={browseJobsStyles.filterGroup}>
             <h3 className={browseJobsStyles.filterGroupTitle}>{title}</h3>
@@ -137,20 +142,30 @@ export function FilterGroup({
 }
 
 export function BrowseJobsFilters({
+
     initialFilters,
     jobTypeCounts,
     categoryCounts,
     remoteCount = 0,
     onFilterChange,
 }: FiltersProps) {
+    const router = useRouter()
+
     function handleChange(event: ChangeEvent<HTMLFormElement>) {
-        onFilterChange?.(readFilters(event.currentTarget));
+
+        const { name, value } = event.target
+        const params = new URLSearchParams(window.location.search);
+        params.set(name, value)
+        console.log("object",name);
+
+        router.push(`/browser-jobs?${params.toString()}`)
     }
 
     return (
         <aside className={browseJobsStyles.sidebar}>
             <h2 className={browseJobsStyles.sidebarTitle}>Filters</h2>
             <form onChange={handleChange}>
+
                 <FilterGroup title="Job Type">
                     {JOB_TYPES.map((type) => (
                         <FilterOption

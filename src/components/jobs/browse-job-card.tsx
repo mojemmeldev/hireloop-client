@@ -1,3 +1,4 @@
+"use client"
 import {
     BookmarkIcon,
     BriefcaseIcon,
@@ -14,18 +15,24 @@ import {
     isJobExpired,
 } from "@/lib/utils/jobs";
 import { cn } from "@/lib/utils";
+import {  useRouter } from "next/navigation";
 
 export function BrowseJobCard({ job }: { job: JobRow }) {
+    const router = useRouter()
     const expired = isJobExpired(job.deadline);
     const companyInitial = job.company.trim().charAt(0).toUpperCase() || "?";
 
+    const handleViewJobDetails=()=>{
+        router.push(`/browser-jobs/${job._id}`);
+    }
+
     return (
-        <article className={browseJobsStyles.jobCard}>
+        <article onClick={handleViewJobDetails} className={browseJobsStyles.jobCard}>
             <div className={browseJobsStyles.jobCardTop}>
                 <div className={browseJobsStyles.companyLogo}>{companyInitial}</div>
 
                 <div className={browseJobsStyles.jobCardMain}>
-                    <h3 className={browseJobsStyles.jobTitle}>{job.title}</h3>
+                    <h3 className={browseJobsStyles.jobTitle}> {job.title}</h3>
                     <div className={browseJobsStyles.jobMeta}>
                         <span>{job.company}</span>
                         <span aria-hidden="true">•</span>
