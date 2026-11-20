@@ -8,3 +8,9 @@ export const getJobs = async (query:''):Promise<JobRow[]>=>{
     return res.json();
 
 }
+
+export const getJobByID = async (jobId:string):Promise<JobRow>=>{
+    const res =await fetch(`${BASE_URL}/jobs/${jobId}`)
+    return res.json();
+
+}

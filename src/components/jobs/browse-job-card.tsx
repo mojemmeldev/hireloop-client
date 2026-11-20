@@ -20,8 +20,8 @@ import {  useRouter } from "next/navigation";
 export function BrowseJobCard({ job }: { job: JobRow }) {
     const router = useRouter()
     const expired = isJobExpired(job.deadline);
-    const companyInitial = job.company.trim().charAt(0).toUpperCase() || "?";
-
+    // const companyInitial = job.company.trim().charAt(0).toUpperCase() || "?";
+    const companyInitial =job.company?.trim().charAt(0).toUpperCase() || "?";
     const handleViewJobDetails=()=>{
         router.push(`/browser-jobs/${job._id}`);
     }

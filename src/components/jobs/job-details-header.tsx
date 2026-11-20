@@ -1,10 +1,53 @@
+"use client"
 import { BadgeCheckIcon, BookmarkIcon } from "lucide-react";
 
 import { jobDetailsStyles } from "@/lib/styles/job-details";
 import type { JobRow } from "@/lib/types/jobs";
+import { useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { applyToAJOb } from "@/lib/actions/applications";
 
 export function JobDetailsHeader({ job }: { job: JobRow }) {
+    const {data:session}=useSession()
+    const user= session?.user;
+    
+    const router= useRouter()
+
+
     const companyInitial = job.company.trim().charAt(0).toUpperCase() || "?";
+
+    const handleApplyNow=async ()=>{
+        console.log("Apply button clicked!");
+        console.log("User:", user);
+
+        if (!user){
+            router.push(`/sign-in?redirectTo=/browser-jobs/${job._id}`)
+
+            return
+        }
+        else if (user.role ==="seeker"){
+            console.log("Seeker detected!");
+                //save the application to the database
+                // todo: only send jobId and userId or email address for the application
+            const application={
+                jobId: job._id,
+                userId: user.id,
+                name:user.name,
+                email:user.email,
+                jobTitle:job.title,
+                companyName:job.company,
+            }
+            const result =await applyToAJOb(application);
+            console.log("result apply" ,result);
+            if(result.insertedId){
+                console.log("Application submitted seccessfully");
+                router.push('/browser-jobs')
+            }
+        }
+        else{
+            console.log("user is not seeker");
+        }
+    }
 
     return (
         <header className={jobDetailsStyles.header}>
@@ -35,7 +78,7 @@ export function JobDetailsHeader({ job }: { job: JobRow }) {
                     >
                         <BookmarkIcon className="size-[18px]" />
                     </button>
-                    <button type="button" className={jobDetailsStyles.applyButton}>
+                    <button onClick={handleApplyNow} type="button" className={jobDetailsStyles.applyButton}>
                         Apply Now
                     </button>
                 </div>
