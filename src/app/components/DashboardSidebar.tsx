@@ -41,7 +41,7 @@ const menuItemsByRole: Record<UserRole, SidebarMenuItemData[]> = {
         { id: "dashboard", name: "Dashboard", url: "/dashboard", Icon: LayoutDashboard },
         { id: "jobs", name: "Jobs", url: "/dashboard/jobs", Icon: Briefcase },
         { id: "saved-jobs", name: "Saved Jobs", url: "/dashboard/saved-jobs", Icon: Bookmark },
-        { id: "applications", name: "Applications", url: "/dashboard/applications", Icon: FileText },
+        { id: "applications", name: "Applications", url: "/dashboard/seeker/applications", Icon: FileText },
         { id: "billing", name: "Billing", url: "/dashboard/billing", Icon: Wallet },
         { id: "settings", name: "Settings", url: "/dashboard/settings", Icon: Settings },
     ],

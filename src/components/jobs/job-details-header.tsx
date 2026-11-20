@@ -1,53 +1,55 @@
-"use client"
-import { BadgeCheckIcon, BookmarkIcon } from "lucide-react";
+"use client";
 
-import { jobDetailsStyles } from "@/lib/styles/job-details";
-import type { JobRow } from "@/lib/types/jobs";
-import { useSession } from "@/lib/auth-client";
+import { useState } from "react";
+import { BadgeCheckIcon, BookmarkIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { applyToAJOb } from "@/lib/actions/applications";
+
+import { applyToJob } from "@/lib/actions/applications";
+import { useSession } from "@/lib/auth-client";
+import { jobDetailsStyles } from "@/lib/styles/job-details";
+import type { NewApplication } from "@/lib/types/applications";
+import type { JobRow } from "@/lib/types/jobs";
 
 export function JobDetailsHeader({ job }: { job: JobRow }) {
-    const {data:session}=useSession()
-    const user= session?.user;
-    
-    const router= useRouter()
-
+    const { data: session } = useSession();
+    const user = session?.user;
+    const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const companyInitial = job.company.trim().charAt(0).toUpperCase() || "?";
 
-    const handleApplyNow=async ()=>{
-        console.log("Apply button clicked!");
-        console.log("User:", user);
+    const handleApplyNow = async () => {
+        if (!user) {
+            router.push(`/sign-in?redirectTo=/browser-jobs/${job._id}`);
+            return;
+        }
 
-        if (!user){
-            router.push(`/sign-in?redirectTo=/browser-jobs/${job._id}`)
+        if (user.role !== "seeker") return;
 
-            return
-        }
-        else if (user.role ==="seeker"){
-            console.log("Seeker detected!");
-                //save the application to the database
-                // todo: only send jobId and userId or email address for the application
-            const application={
-                jobId: job._id,
-                userId: user.id,
-                name:user.name,
-                email:user.email,
-                jobTitle:job.title,
-                companyName:job.company,
+        const application: NewApplication = {
+            jobId: job._id,
+            userId: String(user.id ?? ""),
+            name: user.name ?? "",
+            email: user.email ?? "",
+            jobTitle: job.title,
+            companyName: job.company,
+            jobType: job.jobType,
+            workSetting: job.isRemote ? "Remote" : "On-site",
+            appliedAt: new Date().toISOString(),
+            status: "Applied",
+            isArchived: false,
+        };
+
+        setIsSubmitting(true);
+        try {
+            const result = await applyToJob(application);
+            if (result?.insertedId) {
+                router.push("/dashboard/seeker/applications");
             }
-            const result =await applyToAJOb(application);
-            console.log("result apply" ,result);
-            if(result.insertedId){
-                console.log("Application submitted seccessfully");
-                router.push('/browser-jobs')
-            }
+        } finally {
+            setIsSubmitting(false);
         }
-        else{
-            console.log("user is not seeker");
-        }
-    }
+    };
 
     return (
         <header className={jobDetailsStyles.header}>
@@ -78,8 +80,13 @@ export function JobDetailsHeader({ job }: { job: JobRow }) {
                     >
                         <BookmarkIcon className="size-[18px]" />
                     </button>
-                    <button onClick={handleApplyNow} type="button" className={jobDetailsStyles.applyButton}>
-                        Apply Now
+                    <button
+                        onClick={handleApplyNow}
+                        disabled={isSubmitting}
+                        type="button"
+                        className={jobDetailsStyles.applyButton}
+                    >
+                        {isSubmitting ? "Applying..." : "Apply Now"}
                     </button>
                 </div>
             </div>
