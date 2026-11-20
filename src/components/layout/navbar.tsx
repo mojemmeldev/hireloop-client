@@ -46,7 +46,7 @@ function NavLinks({ className }: { className?: string }) {
 
   // Dashboard link only when logged in — points to the role's dashboard
   const navLinks = [
-    { href: "/jobs", label: "Browse Jobs" },
+    { href: "/browser-jobs", label: "Browse Jobs" },
     { href: "/companies", label: "Company" },
     { href: "/pricing", label: "Pricing" },
 
