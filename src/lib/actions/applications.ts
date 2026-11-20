@@ -59,3 +59,15 @@ export const getApplications = async (query = ""): Promise<Application[]> => {
 
     return res.json();
 };
+
+export const getApplicationsCount = async (query = ""): Promise<{count:number}> => {
+    const res = await fetch(`${BASE_URL}/applications/count?${query}`, {
+        cache: "no-store",
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to load applications");
+    }
+
+    return res.json();
+};

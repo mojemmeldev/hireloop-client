@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BadgeCheckIcon, BookmarkIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { applyToJob } from "@/lib/actions/applications";
+import { applyToJob, getApplicationsCount } from "@/lib/actions/applications";
 import { useSession } from "@/lib/auth-client";
 import { jobDetailsStyles } from "@/lib/styles/job-details";
 import type { NewApplication } from "@/lib/types/applications";
@@ -18,13 +18,21 @@ export function JobDetailsHeader({ job }: { job: JobRow }) {
 
     const companyInitial = job.company.trim().charAt(0).toUpperCase() || "?";
 
-    const handleApplyNow = async () => {
-        if (!user) {
-            router.push(`/sign-in?redirectTo=/browser-jobs/${job._id}`);
+   const handleApplyNow = async () => {
+    if (!user) {
+        router.push(`/sign-in?redirectTo=/browser-jobs/${job._id}`);
+        return;
+    }
+
+    if (user.role === "seeker") {
+        const countResult = await getApplicationsCount(
+            `applicantId=${user.id}`
+        );
+
+        if (countResult.count >= 10) {
+            router.push("/payment");
             return;
         }
-
-        if (user.role !== "seeker") return;
 
         const application: NewApplication = {
             jobId: job._id,
@@ -41,15 +49,23 @@ export function JobDetailsHeader({ job }: { job: JobRow }) {
         };
 
         setIsSubmitting(true);
+
         try {
             const result = await applyToJob(application);
+
             if (result?.insertedId) {
                 router.push("/dashboard/seeker/applications");
             }
         } finally {
             setIsSubmitting(false);
         }
-    };
+
+    } else {
+        console.log("Only job seekers can apply for jobs");
+    }
+};
+
+
 
     return (
         <header className={jobDetailsStyles.header}>
