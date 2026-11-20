@@ -120,13 +120,20 @@ export function PaymentForm() {
                     </span>
                 </label>
 
-                <button
-                    type="button"
-                    title="Stripe checkout will be connected here"
-                    className={paymentStyles.payButton}
-                >
-                    Pay
-                </button>
+
+
+                <form action="/api/checkout_sessions" method="POST">
+                    <section>
+                        
+
+                        <button type="submit" role="link"
+                            title="Stripe checkout will be connected here"
+                            className={paymentStyles.payButton}
+                        >
+                            Pay
+                        </button>
+                    </section>
+                </form>
             </div>
         </section>
     );
