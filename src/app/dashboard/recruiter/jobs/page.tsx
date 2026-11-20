@@ -20,7 +20,7 @@ import UpdateJobForm from "@/app/components/UpdateJobForm";
 export type JobRow = SharedJobRow;
 
 const RecruiterJobsPage = async () => {
-    const jobs: JobRow[] = await getJobs();
+    const jobs: JobRow[] = await getJobs("");
 
     return (
         <div className={jobStyles.page}>

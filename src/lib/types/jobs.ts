@@ -14,6 +14,7 @@ export type NewJobFormData = {
     salaryFrequency: string;
     responsibilities: string;
     qualifications: string;
+    
 };
 
 // A row in the manage-jobs table = the form data + listing metadata from the API.
