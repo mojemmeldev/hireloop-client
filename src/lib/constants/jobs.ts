@@ -47,6 +47,7 @@ export const EMPTY_JOB_FORM: NewJobFormData = {
     title: "",
     company: "",
     category: "Engineering & Tech",
+    recruiterId: "",
     jobType: "Full-time",
     isRemote: false,
     location: "",

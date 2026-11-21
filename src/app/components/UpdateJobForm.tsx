@@ -35,6 +35,7 @@ export default function UpdateJobForm({ job }: { job: JobRow }) {
     const [formData, setFormData] = useState<NewJobFormData>({
         title: job.title,
         company: job.company,
+        recruiterId: job.recruiterId,
         category: job.category,
         jobType: job.jobType,
         isRemote: job.isRemote,

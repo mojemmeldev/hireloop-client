@@ -61,4 +61,13 @@ export const applicationsStyles = {
         "flex size-8 items-center justify-center rounded-lg border border-white/[0.06] text-[#A0A0AB] transition-colors hover:bg-[#222228] hover:text-white",
     paginationPage:
         "flex size-8 items-center justify-center rounded-lg bg-white text-[13px] font-medium text-[#0B0B0C]",
+
+    // Recruiter review flow — status control on the job applications page.
+    // The wrapper carries the status colors (badge classes), the select inside
+    // is transparent so it inherits them.
+    statusSelectWrap: "relative inline-flex w-fit items-center rounded-lg border",
+    statusSelect:
+        "cursor-pointer appearance-none bg-transparent py-1 pr-8 pl-3 text-[13px] font-medium outline-none disabled:cursor-not-allowed",
+    statusSelectIcon:
+        "pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2 opacity-70",
 } as const;

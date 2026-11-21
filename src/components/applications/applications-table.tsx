@@ -1,12 +1,12 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
+import { ApplicationStatusBadge } from "@/components/applications/application-status-badge";
 import { applicationsStyles } from "@/lib/styles/applications";
 import type { Application } from "@/lib/types/applications";
 import {
     formatAppliedAt,
     getCompanyInitial,
     getCompanyLogoClass,
-    getStatusBadgeClass,
 } from "@/lib/utils/applications";
 import { cn } from "@/lib/utils";
 
@@ -79,14 +79,9 @@ export function ApplicationsTable({ applications }: { applications: Application[
                                 </span>
                             </td>
                             <td className={applicationsStyles.tableCell}>
-                                <span
-                                    className={cn(
-                                        applicationsStyles.statusBadge,
-                                        getStatusBadgeClass(application.status),
-                                    )}
-                                >
-                                    {application.status}
-                                </span>
+                                <ApplicationStatusBadge
+                                    status={application.status}
+                                />
                             </td>
                             <td className={cn(applicationsStyles.tableCell, "text-right")}>
                                 <button type="button" className={applicationsStyles.detailsButton}>

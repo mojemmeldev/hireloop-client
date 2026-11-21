@@ -51,6 +51,8 @@ export const jobStyles = {
     tableActions: "flex items-center gap-1.5",
     tableIconButton:
         "size-8 rounded-lg bg-[#1F1F1F] text-[#A0A0AB] hover:bg-[#2A2A2A]",
+    tableLinkButton:
+        "inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#1F1F1F] px-3 text-xs font-medium whitespace-nowrap text-[#C3C0FF] transition-colors hover:bg-[#2A2A2A] hover:text-white",
 
     typeBadge:
         "inline-block rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/70",

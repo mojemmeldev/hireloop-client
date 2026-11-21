@@ -29,13 +29,20 @@ import { EMPTY_JOB_FORM } from "@/lib/constants/jobs";
 import { jobStyles } from "@/lib/styles/jobs";
 import type { NewJobFormData } from "@/lib/types/jobs";
 import { cn } from "@/lib/utils";
+import { useSession } from "@/lib/auth-client";
 
 const requiredMark = <span className={jobStyles.required}>*</span>;
 
 const NewJobPage = () => {
+
+    const { data: session } = useSession()
+    const recruiterId = session?.user?.id;
+
     const [formData, setFormData] = useState<NewJobFormData>({
         ...EMPTY_JOB_FORM,
     });
+
+
     const router = useRouter()
 
     // one handler for every plain input/textarea
@@ -48,12 +55,18 @@ const NewJobPage = () => {
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        const JobData = {...formData}
+
+        if (!recruiterId) {
+            return;
+        }
+
+
+        const JobData = { ...formData, recruiterId }
         // data is ready — wire to your API / backend later
         console.log("[new-job] form submitted:", formData);
 
         const result = await createJob(JobData)
-        console.log("fetch result ",result);
+        console.log("fetch result ", result);
 
         if (result.insertedId) {
             toast.add({

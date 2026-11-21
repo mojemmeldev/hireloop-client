@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PlusIcon } from "lucide-react";
+import { FileTextIcon, PlusIcon } from "lucide-react";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { JobPrimaryButton, JobStatusBadge, JobTypeBadge } from "@/components/jobs/job-ui";
@@ -15,12 +15,18 @@ import {
 } from "@/lib/utils/jobs";
 import { DeleteJobDialog } from "@/app/components/DeleteJobDialog";
 import UpdateJobForm from "@/app/components/UpdateJobForm";
+import { getSession } from "@/lib/core/server";
+
 
 // Kept exported for backwards compatibility with existing imports.
 export type JobRow = SharedJobRow;
 
 const RecruiterJobsPage = async () => {
-    const jobs: JobRow[] = await getJobs("");
+
+    const session=  await getSession()
+    console.log('recruiter', session?.user.id);
+
+    const jobs: JobRow[] = await getJobs(`recruiterId=${session?.user.id}` as "");
 
     return (
         <div className={jobStyles.page}>
@@ -128,6 +134,14 @@ const RecruiterJobsPage = async () => {
                                     </TableCell>
                                     <TableCell className={jobStyles.tableCell}>
                                         <div className={jobStyles.tableActions}>
+                                            <Link
+                                                href={`/dashboard/recruiter/jobs/${job._id}/applications`}
+                                                aria-label={`View applications for ${job.title}`}
+                                                className={jobStyles.tableLinkButton}
+                                            >
+                                                <FileTextIcon className="size-4" />
+                                                Applications
+                                            </Link>
                                             <UpdateJobForm job={job} />
                                             <DeleteJobDialog job={job} />
                                         </div>

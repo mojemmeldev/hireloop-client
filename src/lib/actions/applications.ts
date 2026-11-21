@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import type { Application, NewApplication } from "@/lib/types/applications";
+import type {
+    Application,
+    ApplicationStatus,
+    NewApplication,
+} from "@/lib/types/applications";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URI || "http://localhost:5000";
 
@@ -70,4 +74,31 @@ export const getApplicationsCount = async (query = ""): Promise<{count:number}> 
     }
 
     return res.json();
+};
+
+/**
+ * Persist an applicant's status change (recruiter review flow).
+ *
+ * The UI updates optimistically and calls this in the background. The server
+ * route (`PATCH /applications/:id`) is still to be added on the API side —
+ * until then the call is a harmless no-op and nothing else needs to change
+ * here once the endpoint exists.
+ */
+export const updateApplicationStatus = async (
+    applicationId: string,
+    status: ApplicationStatus,
+): Promise<{ ok: boolean }> => {
+    try {
+        const res = await fetch(`${BASE_URL}/applications/${applicationId}`, {
+            method: "PATCH",
+            headers: {
+                "content-type": "application/json",
+            },
+            body: JSON.stringify({ status }),
+        });
+        return { ok: res.ok };
+    } catch {
+        // Network failure — the caller already shows the optimistic state.
+        return { ok: false };
+    }
 };
