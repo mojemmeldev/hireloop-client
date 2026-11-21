@@ -21,6 +21,7 @@ import type { Application, ApplicationStatus } from "@/lib/types/applications";
 import type { JobRow } from "@/lib/types/jobs";
 import { formatAppliedAt } from "@/lib/utils/applications";
 import { cn } from "@/lib/utils";
+import { set } from "better-auth";
 
 const APPLICATION_COLUMNS = [
     "Applicant",
@@ -52,30 +53,36 @@ type JobApplicationsViewProps = {
  * Status changes are applied optimistically and persisted in the background
  * via `updateApplicationStatus`.
  */
-export function JobApplicationsView({
-    job,
-    applications: initialApplications,
-}: JobApplicationsViewProps) {
-    const [applications, setApplications] = useState<Application[]>(
-        initialApplications,
-    );
+export function JobApplicationsView({ job, applications: initialApplications, }: JobApplicationsViewProps) {
+    const [applications, setApplications] = useState<Application[]>( initialApplications, );
+    const [statuses,setStatuses]=useState()
+    
 
-    const handleStatusChange = (
-        applicationId: string,
-        status: ApplicationStatus,
-    ) => {
-        setApplications((current) =>
-            current.map((application) =>
-                application._id === applicationId
-                    ? { ...application, status }
-                    : application,
-            ),
-        );
+    const handleStatusChange = async ( applicationId: string, status: ApplicationStatus, ) => {
+        // setApplications((current) =>
+        //     current.map((application) =>
+        //         application._id === applicationId
+        //             ? { ...application, status }
+        //             : application,
+        //     ),
+        // );
 
         // Fire-and-forget: the row already reflects the new status; the API
         // endpoint for persisting it is added on the server later.
-        void updateApplicationStatus(applicationId, status);
+        // void updateApplicationStatus(applicationId, status);
+        const result =await updateApplicationStatus(applicationId, status);
+        console.log("update",result);
+
+        if(result.modifiedCount>0){
+            setStatuses()
+        }
     };
+
+        
+
+
+    
+
 
     return (
         <div className={jobStyles.page}>

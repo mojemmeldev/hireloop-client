@@ -84,11 +84,8 @@ export const getApplicationsCount = async (query = ""): Promise<{count:number}> 
  * until then the call is a harmless no-op and nothing else needs to change
  * here once the endpoint exists.
  */
-export const updateApplicationStatus = async (
-    applicationId: string,
-    status: ApplicationStatus,
-): Promise<{ ok: boolean }> => {
-    try {
+export const updateApplicationStatus = async ( applicationId: string, status: ApplicationStatus, ): Promise<{ ok: boolean }> => {
+    
         const res = await fetch(`${BASE_URL}/applications/${applicationId}`, {
             method: "PATCH",
             headers: {
@@ -96,9 +93,5 @@ export const updateApplicationStatus = async (
             },
             body: JSON.stringify({ status }),
         });
-        return { ok: res.ok };
-    } catch {
-        // Network failure — the caller already shows the optimistic state.
-        return { ok: false };
-    }
+    return res.json();
 };
