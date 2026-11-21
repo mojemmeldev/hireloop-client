@@ -73,4 +73,47 @@ export const paymentStyles = {
     poweredBy: "text-xs font-medium text-[#808089]",
     footerLinks: "flex items-center gap-6 text-[11px] font-medium text-[#808089]",
     footerLink: "transition-colors hover:text-white",
+
+    // Checkout success / status screens
+    successMain: "mx-auto flex w-full max-w-[560px] flex-col px-6 pb-24 pt-4 sm:px-10",
+    successCard:
+        "w-full rounded-xl border border-[#2E2E33] bg-[#101013] p-6 sm:p-8",
+    successIconWrap:
+        "flex size-14 items-center justify-center rounded-full bg-[#00D66F]/10 ring-1 ring-[#00D66F]/40",
+    successIcon: "size-7 text-[#00D66F]",
+    successTitle: "mt-5 text-center text-2xl font-semibold text-white",
+    successSubtitle:
+        "mt-2 text-center text-sm leading-relaxed text-[#A1A1AA]",
+    paidBadge:
+        "mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#00D66F]/10 px-3 py-1 text-xs font-bold tracking-wide text-[#00D66F]",
+
+    transactionBox: "mt-6 rounded-lg border border-[#2E2E33] bg-[#1B1B1C] p-4",
+    transactionHeader: "flex items-center justify-between gap-3",
+    transactionLabel: "text-xs font-bold tracking-[0.08em] text-[#808089]",
+    transactionId: "mt-2 font-mono text-sm break-all text-white",
+
+    receiptList: "mt-6 divide-y divide-[#2E2E33] border-t border-[#2E2E33]",
+    receiptRow: "flex items-start justify-between gap-4 py-3.5",
+    receiptLabel:
+        "shrink-0 text-xs font-bold tracking-[0.08em] text-[#808089]",
+    receiptValue: "text-right text-sm text-white",
+    receiptValueMono:
+        "font-mono text-xs break-all text-right text-[#A1A1AA]",
+
+    successActions: "mt-6 flex flex-col gap-3 sm:flex-row",
+    successPrimary:
+        "flex h-11 flex-1 items-center justify-center rounded-lg bg-[#0070E0] text-sm font-bold text-white transition-colors hover:bg-[#1261c4]",
+    successSecondary:
+        "flex h-11 flex-1 items-center justify-center rounded-lg border border-[#2E2E33] text-sm font-bold text-white transition-colors hover:border-white/40",
+    successNote: "mt-5 text-center text-xs text-[#808089]",
+
+    statusWrap:
+        "mx-auto flex w-full max-w-[560px] flex-col items-center px-6 pb-24 pt-10 sm:px-10",
+    statusCard: "w-full rounded-xl border border-[#2E2E33] bg-[#101013] p-8 text-center",
+    statusIcon:
+        "flex size-14 items-center justify-center rounded-full bg-[#0070E0]/10 ring-1 ring-[#0070E0]/40",
+    statusTitle: "mt-5 text-xl font-semibold text-white",
+    statusMessage: "mt-2 text-sm leading-relaxed text-[#A1A1AA]",
+    statusAction:
+        "mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-[#0070E0] px-6 text-sm font-bold text-white transition-colors hover:bg-[#1261c4]",
 } as const;

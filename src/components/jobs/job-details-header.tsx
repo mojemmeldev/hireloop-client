@@ -9,6 +9,9 @@ import { useSession } from "@/lib/auth-client";
 import { jobDetailsStyles } from "@/lib/styles/job-details";
 import type { NewApplication } from "@/lib/types/applications";
 import type { JobRow } from "@/lib/types/jobs";
+import { toast } from "../ui/toast";
+import { getUserPremiumById } from "@/lib/api/user";
+
 
 export function JobDetailsHeader({ job }: { job: JobRow }) {
     const { data: session } = useSession();
@@ -25,11 +28,14 @@ export function JobDetailsHeader({ job }: { job: JobRow }) {
     }
 
     if (user.role === "seeker") {
-        const countResult = await getApplicationsCount(
-            `applicantId=${user.id}`
-        );
 
-        if (countResult.count >= 10) {
+        // is premium user
+        const premiumResult = await getUserPremiumById(user.id)
+        console.log(premiumResult);
+
+        const countResult = await getApplicationsCount( `applicantId=${user.id}` );
+        
+        if (!premiumResult.premium && countResult.count >= 2) {
             router.push("/payment");
             return;
         }
@@ -54,6 +60,10 @@ export function JobDetailsHeader({ job }: { job: JobRow }) {
             const result = await applyToJob(application);
 
             if (result?.insertedId) {
+                toast.add({
+                    title: "Application Submitted",
+                    description:"Your application has been submitted successfully"                    
+                })
                 router.push("/dashboard/seeker/applications");
             }
         } finally {
