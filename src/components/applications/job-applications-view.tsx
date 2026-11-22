@@ -55,28 +55,28 @@ type JobApplicationsViewProps = {
  */
 export function JobApplicationsView({ job, applications: initialApplications, }: JobApplicationsViewProps) {
     const [applications, setApplications] = useState<Application[]>( initialApplications, );
-    const [statuses,setStatuses]=useState()
+    
     
 
-    const handleStatusChange = async ( applicationId: string, status: ApplicationStatus, ) => {
-        // setApplications((current) =>
-        //     current.map((application) =>
-        //         application._id === applicationId
-        //             ? { ...application, status }
-        //             : application,
-        //     ),
-        // );
+    const handleStatusChange = async (
+    applicationId: string,
+    status: ApplicationStatus,
+) => {
+    try {
+        const result = await updateApplicationStatus(applicationId, status);
+        console.log("update", result);
 
-        // Fire-and-forget: the row already reflects the new status; the API
-        // endpoint for persisting it is added on the server later.
-        // void updateApplicationStatus(applicationId, status);
-        const result =await updateApplicationStatus(applicationId, status);
-        console.log("update",result);
-
-        if(result.modifiedCount>0){
-            setStatuses()
-        }
-    };
+        setApplications((current) =>
+            current.map((application) =>
+                application._id === applicationId
+                    ? { ...application, status }
+                    : application,
+            ),
+        );
+    } catch (error) {
+        console.error("Failed to update application status:", error);
+    }
+};
 
         
 
