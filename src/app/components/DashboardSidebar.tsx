@@ -55,7 +55,7 @@ const menuItemsByRole: Record<UserRole, SidebarMenuItemData[]> = {
     ],
     admin: [
         { id: "dashboard", name: "Dashboard", url: "/dashboard", Icon: LayoutDashboard },
-        { id: "users", name: "Users", url: "/dashboard/users", Icon: Users },
+        { id: "users", name: "Users", url: "/dashboard/admin/users", Icon: Users },
         { id: "companies", name: "Companies", url: "/dashboard/companies", Icon: Building2 },
         { id: "jobs", name: "Jobs", url: "/dashboard/jobs", Icon: Briefcase },
         { id: "payments", name: "Payments", url: "/dashboard/payments", Icon: Wallet },
